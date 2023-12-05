@@ -1,0 +1,123 @@
+{% extends 'base/main.html' %}
+{% load static %}
+{% block content %}
+
+<main>
+    <section id="form-container">
+        <img id="logo" src="{% static 'images/chat-icon.png' %}" alt="Chat Icon"/>
+
+        <div id="welcome-message">
+            <h1>Welcome to chat+</h1>
+            <p>A group video calling platform made just for you!</p>
+        </div>
+
+        <form id="form">
+            <div class="field-wrapper">
+                <div class="form-field">
+                    <label for="roomInput">Room:</label>
+                    <input id="roomInput" name="room" placeholder="Enter a room name..." style="text-transform: uppercase"/>
+                </div>
+
+                <div class="form-field">
+                    <label for="nameInput">Name:</label>
+                    <input id="nameInput" name="name" placeholder="Enter your name..." style="text-transform: uppercase"/>
+                </div>
+
+                <div class="form-field">
+                    <input type="submit" value="Join Stream"/>
+                </div>
+            </div>
+        </form>
+
+        <button id="audioButton" onclick="toggleAudio()">Play</button>
+    </section>
+
+    <!-- Audio -->
+    <audio id="audio">
+        <source src="{% static 'audio/audiohack.mp3' %}" type="audio/mpeg">
+        Your browser does not support the audio element.
+    </audio>
+
+    <!-- Get in Touch Link -->
+    <!-- Your other HTML content -->
+
+<footer class="footer">
+    <div class="container">
+        <!-- Your other footer content -->
+    </div>
+
+    <!-- Contact form -->
+    <div class="contact-form">
+        <h3>Contact Us</h3>
+        <form>
+            <!-- Form fields -->
+            <input type="text" placeholder="Name">
+            <input type="email" placeholder="Email">
+            <textarea placeholder="Message"></textarea>
+            <button type="submit">Send</button>
+        </form>
+    </div>
+</footer>
+
+    
+    <!-- Dialogflow Web Chat Integration -->
+    <script src="https://www.gstatic.com/dialogflow-console/fast/messenger/bootstrap.js?v=1"></script>
+    <df-messenger
+      chat-icon="https:&#x2F;&#x2F;drive.google.com&#x2F;file&#x2F;d&#x2F;1eGeKn-ILKnW0XY3Ueql0iZ3SxUpAQbsg&#x2F;view?usp=sharing"
+      intent="WELCOME"
+      chat-title="Lalith"
+      agent-id="ddcb0757-7ac0-4214-ae23-82c55f14dcd6"
+      language-code="en"
+    ></df-messenger>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const audioButton = document.getElementById('audioButton');
+
+        function toggleAudio() {
+            if (audio.paused) {
+                audio.play();
+                audioButton.textContent = 'Pause';
+            } else {
+                audio.pause();
+                audioButton.textContent = 'Play';
+            }
+        }
+
+        // Play audio once when the page loads and then pause it
+        document.addEventListener('DOMContentLoaded', function() {
+            audio.play();
+            audio.addEventListener('ended', function() {
+                audio.pause();
+            });
+        });
+
+        const form = document.getElementById('form');
+
+        const handleSubmit = async (e) => {
+            e.preventDefault();
+            const room = document.getElementById('roomInput').value.toUpperCase();
+            const name = document.getElementById('nameInput').value;
+
+            try {
+                const response = await fetch(`/get_token/?channel=${room}`);
+                const data = await response.json();
+
+                const { uid, token } = data;
+                sessionStorage.setItem('UID', uid);
+                sessionStorage.setItem('token', token);
+                sessionStorage.setItem('room', room);
+                sessionStorage.setItem('name', name);
+
+                window.open('/room/', '_self');
+            } catch (error) {
+                console.error('Error:', error);
+                // Handle error scenarios here
+            }
+        };
+
+        form.addEventListener('submit', handleSubmit);
+    </script>
+</main>
+
+{% endblock content %}
